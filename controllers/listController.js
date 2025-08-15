@@ -1,5 +1,5 @@
 import List from "../models/List.js";
-
+import Task from "../models/Task.js";
 // Get all lists for a user
 export const getLists = async (req, res) => {
     try {
@@ -39,16 +39,20 @@ export const deleteList = async (req, res) => {
     try {
         const { id } = req.params;
 
-        const deleted = await List.findOneAndDelete({
+        // First, delete all tasks associated with the list
+        await Task.deleteMany({ listId: id, userId: req.user.id });
+
+        // Then, delete the list itself
+        const deletedList = await List.findOneAndDelete({
             _id: id,
             userId: req.user.id
         });
 
-        if (!deleted) {
+        if (!deletedList) {
             return res.status(404).json({ message: "List not found." });
         }
 
-        res.status(200).json({ message: "List deleted successfully!" });
+        res.status(200).json({ message: "List and all associated tasks deleted successfully!" });
     } catch (error) {
         console.error("Delete List Error:", error);
         res.status(500).json({ message: "Server error deleting list." });

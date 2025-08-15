@@ -40,11 +40,10 @@ export const addTask = async (req, res) => {
 export const updateTask = async (req, res) => {
     try {
         const { id } = req.params;
-        const { title, description, completed } = req.body;
-
+        const { listId, title, priority,dueDate,isCompleted } = req.body;
         const updatedTask = await Task.findOneAndUpdate(
             { _id: id, userId: req.user.id },
-            { title, description, completed },
+            { listId, title, priority,dueDate,isCompleted },
             { new: true }
         );
 

@@ -4,7 +4,7 @@ import authMiddleware from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-router.get("/:listId", authMiddleware, getTasks);   // Get tasks for a list
+router.get("/", authMiddleware, getTasks);   // Get tasks for a list
 router.post("/", authMiddleware, addTask);          // Add a task
 router.put("/:id", authMiddleware, updateTask);     // Update a task
 router.delete("/:id", authMiddleware, deleteTask);  // Delete a task
