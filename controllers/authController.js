@@ -1,6 +1,8 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
+import List from "../models/List.js";
+
 export const signup = async (req, res) => {
     try {
         const { name, email, password } = req.body;
@@ -23,12 +25,24 @@ export const signup = async (req, res) => {
         const newUser = new User({ name, email, password_hash });
         await newUser.save();
 
-        const token = jwt.sign({ userId: newUser._id }, process.env.JWT_SECRET, { expiresIn: "1h" });
+        // Create default "Personal" list for the new user
+        const personalList = new List({
+            name: "Personal",
+            userId: newUser._id
+        });
+        await personalList.save();
 
+        const token = jwt.sign(
+            { userId: newUser._id },
+            process.env.JWT_SECRET,
+            { expiresIn: "1h" }
+        );
+        
         res.status(201).json({
             message: "User created successfully!",
             token,
-            user: { id: newUser._id, name: newUser.name, email: newUser.email }
+            user: { id: newUser._id, name: newUser.name, email: newUser.email },
+            defaultList: personalList
         });
 
     } catch (error) {
@@ -66,5 +80,25 @@ export const login = async (req, res) => {
     } catch (error) {
         console.error("Login Error:", error);
         res.status(500).json({ message: "Server error during login." });
+    }
+};
+
+export const changePassword = async (req, res) => {
+    try {
+        const { oldPassword, newPassword } = req.body;
+        const user = await User.findById(req.user.id);
+
+        if (!user) return res.status(404).json({ message: "User not found." });
+
+        const isMatch = await bcrypt.compare(oldPassword, user.password_hash);
+        if (!isMatch) return res.status(400).json({ message: "Incorrect old password." });
+
+        const salt = await bcrypt.genSalt(10);
+        user.password_hash = await bcrypt.hash(newPassword, salt);
+        await user.save();
+
+        res.json({ message: "Password changed successfully." });
+    } catch (error) {
+        res.status(500).json({ message: "Server error while changing password.", error: error.message });
     }
 };
