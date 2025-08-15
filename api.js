@@ -1,7 +1,4 @@
-// Import the new package that makes Express work with Netlify
 import serverless from "serverless-http";
-
-// These are your existing imports, no changes here
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
@@ -18,6 +15,19 @@ connectDB();
 app.use(cors());
 app.use(express.json());
 
+// --- 🕵️‍♂️ START DEBUGGING MIDDLEWARE ---
+// This function will run for every request and log its details.
+app.use((req, res, next) => {
+    console.log("--- NEW REQUEST RECEIVED ---");
+    console.log("METHOD:", req.method);
+    console.log("URL:", req.originalUrl);
+    // The next line is the most important one. It will show us the request body.
+    console.log("BODY:", req.body); 
+    console.log("--------------------------");
+    next(); // Pass the request to the next handler
+});
+// --- END DEBUGGING MIDDLEWARE ---
+
 const router = express.Router();
 
 router.use("/auth", authRoutes);
@@ -25,4 +35,6 @@ router.use("/api/lists", listRoutes);
 router.use("/api/tasks", taskRoutes);
 
 app.use('/.netlify/functions/api', router);
-export const handler = serverless(app);
+
+// Use module.exports for maximum compatibility
+module.exports.handler = serverless(app);
