@@ -1,7 +1,3 @@
-// Import the new package that makes Express work with Netlify
-import serverless from "serverless-http";
-
-// These are your existing imports, no changes here
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
@@ -18,11 +14,9 @@ connectDB();
 app.use(cors());
 app.use(express.json());
 
-const router = express.Router();
+app.use("/auth", authRoutes);
+app.use("/api/lists", listRoutes);
+app.use("/api/tasks", taskRoutes);
 
-router.use("/auth", authRoutes);
-router.use("/api/lists", listRoutes);
-router.use("/api/tasks", taskRoutes);
-
-app.use('/.netlify/functions/api', router);
-export const handler = serverless(app);
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`🚀 Server running on http://localhost:${PORT}`));
