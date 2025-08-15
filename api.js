@@ -2,6 +2,7 @@ import serverless from "serverless-http";
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
+import bodyParser from "body-parser"; // Import body-parser
 import connectDB from "./config/db.js";
 import authRoutes from "./routes/auth.js";
 import listRoutes from "./routes/listRoutes.js";
@@ -13,7 +14,8 @@ const app = express();
 connectDB();
 
 app.use(cors());
-app.use(express.json());
+// Replace express.json() with bodyParser.json()
+app.use(bodyParser.json());
 
 // --- 🕵️‍♂️ START DEBUGGING MIDDLEWARE ---
 // This function will run for every request and log its details.
