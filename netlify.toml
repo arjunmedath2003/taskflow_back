@@ -1,0 +1,11 @@
+[build]
+  # This command tells Netlify to build nothing, since it's a backend.
+  command = "echo 'No build command'"
+  # This is the directory where your serverless function file is.
+  functions = "."
+
+[[redirects]]
+  # This rule takes any request to your site and sends it to your function.
+  from = "/*"
+  to = "/.netlify/functions/api/:splat"
+  status = 200
