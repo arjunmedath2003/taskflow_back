@@ -14,21 +14,33 @@ const app = express();
 connectDB();
 
 app.use(cors());
-// Replace express.json() with bodyParser.json()
+// We keep bodyParser here as a fallback.
 app.use(bodyParser.json());
 
-// --- 🕵️‍♂️ START DEBUGGING MIDDLEWARE ---
-// This function will run for every request and log its details.
+// --- 🕵️‍♂️ START DEBUGGING & FIXING MIDDLEWARE ---
 app.use((req, res, next) => {
+    // Check if the body is a buffer
+    if (req.body instanceof Buffer) {
+        try {
+            // Manually parse the buffer to a JSON object
+            const parsedBody = JSON.parse(req.body.toString());
+            // Replace the buffer with the parsed object
+            req.body = parsedBody;
+            console.log("--- Manually Parsed Body ---");
+        } catch (error) {
+            console.error("Error parsing request body buffer:", error);
+        }
+    }
+
     console.log("--- NEW REQUEST RECEIVED ---");
     console.log("METHOD:", req.method);
     console.log("URL:", req.originalUrl);
-    // The next line is the most important one. It will show us the request body.
+    // This should now log the parsed JSON object, not a buffer.
     console.log("BODY:", req.body); 
     console.log("--------------------------");
     next(); // Pass the request to the next handler
 });
-// --- END DEBUGGING MIDDLEWARE ---
+// --- END DEBUGGING & FIXING MIDDLEWARE ---
 
 const router = express.Router();
 
